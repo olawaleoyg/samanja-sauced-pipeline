@@ -23,4 +23,38 @@ jobs:
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          
+      - name: Set up Packer
+        uses: hashicorp/setup-packer@v3
+        with:
+         version: '1.9.3'
+
+      - name: Validate Packer template
+        run: packer validate template.pkr.hcl
+
+      - name: Build AMI
+        env: 
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          set -x
+          if [[ $GITHUB_REF == refs/heads/main ]]; then
+            packer build template.pkr.hcl | tee build.log
+          else
+            packer build template.pkr.hcl | tee build.log
+          fi
+          ls -l build.log
+
+      - name: Check for build log
+        run: |
+          if [ ! -f build.log ]; then
+            echo "Build log not found!"
+            exit 1
+          fi
+
+      - name: Extract AMI ID
+        id: ami_id
+        run: |
+          AMI_ID=$(grep -oP 'ami-\w+' build.log | tail -1)
+          echo "ami_id=$AMI_ID" >> $GITHUB_OUTPUT
+          cat $GITHUB_OUTPUT
+ 
