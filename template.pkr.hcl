@@ -24,6 +24,10 @@ variable "use_redhat" {
   default = false
 }
 
+variable "ami_tag" {
+  type = string
+}
+
 # ubuntu source block
 source "amazon-ebs" "ubuntu" {
   ami_name      = "packer-example-ubuntu-{{timestamp}}"
