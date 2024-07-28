@@ -41,12 +41,12 @@ jobs:
           fi
           ls -l build.log
 
-      - name: Extract AMI ID from packer log
+      - name: Extract AMI ID from manifest
         id: extract-ami-id
         run: |
-          AMI_ID=$(grep 'amazon-ebs: AMI: ' build.log | awk '{print $4}')
+          AMI_ID=$(jq -r '.builds[-1].artifact_id' manifest.json | cut -d ':' -f2)
           echo "Extracted AMI ID: $AMI_ID"
-          [ -z "$AMI_ID" ] && { echo "AMI ID not found in build log!"; exit 1; }
+          [ -z "$AMI_ID" ] && { echo "AMI ID not found in manifest!"; exit 1; }
           echo "::set-output name=ami_id::$AMI_ID"
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
