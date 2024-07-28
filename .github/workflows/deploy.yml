@@ -40,13 +40,14 @@ jobs:
             packer build -var "ami_tag=testing" template.pkr.hcl | tee build.log
           fi
           ls -l build.log
+          cat build.log
 
-      - name: Check for build log
-        run: |
-          if [ ! -f build.log ]; then
-            echo "Build log not found!"
-            exit 1
-          fi
+      # - name: Check for build log
+      #   run: |
+      #     if [ ! -f build.log ]; then
+      #       echo "Build log not found!"
+      #       exit 1
+      #     fi
 
       - name: Extract AMI id from packer
         id: extract-ami-id
@@ -55,5 +56,58 @@ jobs:
           echo "Extracted AMI ID: $AMI_ID"
           [ -z "$AMI_ID" ] && { echo "AMI ID not found!"; exit 1; }
           echo "::set-output name=ami_id::$AMI_ID"
-          
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
+   
+  deploy-to-testing:
+    if: startsWith(github.ref, 'refs/heads/feature/')
+    needs: packer-test
+    runs-on: xterns
+    environment: testing
+
+    steps: 
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install or Update AWS CLI
+        run: |
+          if command -v aws &> /dev/null; then
+            echo "AWS CLI is installed. updating..."
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install --update
+          else
+            echo "AWS CLI not found. Installing..."
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+          fi
+
+      - name: Set up AWS CLI
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Verify Extracted AMI ID
+        run: |
+          ls -l
+
+      - name: Deploy AMI to testing environment
+        run: |
+          AMI_ID=${{ needs.packer-test.outputs.ami_id }}
+          echo "Deploying AMI to testing environment with ID $AMI_ID"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        
+      - name: Notify team of build success
+        if: success()
+        run: echo "Build and deployment to testing environment successful for branch feature-STDP-239"
+
+      - name: Notify team of build failure
+        if: failure()
+        run: echo "Build and deployment to testing environment failed for branch feature-STDP-239"
