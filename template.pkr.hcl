@@ -46,7 +46,7 @@ source "amazon-ebs" "ubuntu" {
   ssh_username = "ubuntu"
   tags = {
     "Name"        = "Af-xtern-A"
-    "Environment" = "development"
+    "Environment" = "var.ami_tag"
     "OS_Version"  = "Ubuntu 20.04"
     "Release"     = "Latest"
     "Created-by"  = "Packer"
@@ -70,7 +70,7 @@ source "amazon-ebs" "redhat" {
   ssh_username = "ec2-user"
   tags = {
     "Name"        = "Af-xtern-A"
-    "Environment" = "development"
+    "Environment" = "var.ami_tag"
     "OS_Version"  = "RHEL 8.4"
     "Release"     = "Latest"
     "Created-by"  = "Packer"
