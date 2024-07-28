@@ -79,10 +79,10 @@ build {
   # To do this kindly uncomment the "file provision" block below and add "/tmp" to "shell provision" block below.
   # e.g /tmp/packer-scripts/001-critical-standards.sh, /tmp/packer-scripts/002-critical-standards.sh
 
-  # provisioner "file" {
-  #   source      = "packer-scripts"
-  #   destination = "/tmp"
-  # }
+   provisioner "file" {
+     source      = "packer-scripts"
+     destination = "/tmp"
+  }
 
   # Using Hcl2 concat function and variable shell provisioning across ubuntu and redhat Linux distros
   provisioner "shell" {
@@ -90,7 +90,7 @@ build {
       var.use_ubuntu ? ["sudo apt update -y"] : [],
       var.use_redhat ? ["sudo yum update -y"] : [],
       [
-        "sudo bash ./001-critical-standards.sh"
+        "sudo bash ./tmp/001-critical-standards.sh"
       ]
     )
   }
