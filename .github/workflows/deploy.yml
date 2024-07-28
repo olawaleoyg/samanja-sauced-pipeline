@@ -16,7 +16,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
+        
+      - name: List repository contents
+        run: ls -R
+        
       - name: Set up Packer
         uses: hashicorp/setup-packer@v3
         with:
