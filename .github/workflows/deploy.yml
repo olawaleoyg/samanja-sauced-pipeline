@@ -40,8 +40,17 @@ jobs:
             packer build -var "ami_tag=testing" template.pkr.hcl | tee build.log
           fi
           ls -l build.log
-          cat build.log
 
+      - name: Extract AMI ID from packer log
+        id: extract-ami-id
+        run: |
+          AMI_ID=$(grep 'amazon-ebs: AMI: ' build.log | awk '{print $4}')
+          echo "Extracted AMI ID: $AMI_ID"
+          [ -z "$AMI_ID" ] && { echo "AMI ID not found in build log!"; exit 1; }
+          echo "::set-output name=ami_id::$AMI_ID"
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
       # - name: Check for build log
       #   run: |
       #     if [ ! -f build.log ]; then
@@ -49,18 +58,6 @@ jobs:
       #       exit 1
       #     fi
 
-      - name: Extract AMI id from packer
-        id: extract-ami-id
-        run: |
-          AMI_ID=$(aws ec2 describe-images --filters "Name=name,Values=name" --query 'Images[0].ImageId' --output text)
-          echo "Extracted AMI ID: $AMI_ID"
-          [ -z "$AMI_ID" ] && { echo "AMI ID not found!"; exit 1; }
-          echo "::set-output name=ami_id::$AMI_ID"
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-   
   deploy-to-testing:
     if: startsWith(github.ref, 'refs/heads/feature/')
     needs: packer-test
