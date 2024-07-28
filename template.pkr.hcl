@@ -90,7 +90,7 @@ build {
       var.use_ubuntu ? ["sudo apt update -y"] : [],
       var.use_redhat ? ["sudo yum update -y"] : [],
       [
-        "sudo bash packer-scripts/001-critical-standards.sh",
+        "sudo bash ./packer-scripts/001-critical-standards.sh",
       ]
     )
   }
