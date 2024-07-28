@@ -30,7 +30,9 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
       - name: Validate Packer template
-        run: packer validate template.pkr.hcl
+        run: |
+          packer init .
+          packer validate template.pkr.hcl
 
       - name: Build AMI
         run: |
