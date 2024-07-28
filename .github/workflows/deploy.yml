@@ -10,6 +10,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: List files in the working directory
+        run: ls -la
+
+      - name: Print the current directory
+        run: pwd
+
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
