@@ -18,7 +18,6 @@ jobs:
 
     steps:
       - name: Checkout code
-        feature/packer-template-pipeline
         uses: actions/checkout@v4
 
       # - name: Install additional packages
