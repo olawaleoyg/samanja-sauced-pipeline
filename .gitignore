@@ -1,0 +1,30 @@
+# Packer Build Artifacts
+*.iso
+*.box
+packer_cache/
+
+# Logs and Temporary Files
+*.log
+*.tmp
+
+# Virtual Machine Images and Snapshots
+*.vmdk
+*.vdi
+*.qcow2
+*.ova
+*.ovf
+
+# Build Output Directories
+output/
+packer_logs/
+
+# Environment-Specific Configuration
+.env
+*.json
+
+# Package Management Artifacts
+*.deb
+*.rpm
+*.tar.gz
+*.zip
+
