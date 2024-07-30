@@ -22,8 +22,8 @@ jobs:
 
       - name: Install additional packages
         run: |
-          sudo apt-get update
-          sudo apt-get install -y unzip jq
+          sudo apt update
+          sudo apt install -y unzip jq
 
       - name: Set up Packer
         uses: hashicorp/setup-packer@v3
