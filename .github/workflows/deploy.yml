@@ -5,11 +5,13 @@ on:
     branches:
       - 'main'
       - 'feat/fix'
+      - 'feat/fix-main-pipeline2'
 
   pull_request:
     branches:
       - 'main'
       - 'feat/fix'
+      - 'feat/fix-main-pipeline2'
 
   workflow_dispatch:
     inputs:
@@ -58,7 +60,7 @@ jobs:
     permissions:
       contents: read
       issues: write
-    environment: prod
+    environment: production
    
     steps:
       - name: Checkout code
