@@ -20,7 +20,7 @@ on:
 
 jobs:
   packer-test:
-    runs-on: ubuntu-latest
+    runs-on: xterns
 
     outputs:
       ami_id: ${{ steps.build-and-extract-ami-id.outputs.ami_id }}
@@ -54,11 +54,11 @@ jobs:
     # if: startsWith(github.ref, 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     if: github.ref == 'refs/heads/main'
     needs: packer-test
-    runs-on: ubuntu-latest
+    runs-on: xterns
     permissions:
       contents: read
       issues: write
-    environment: prod
+    environment: production
    
     steps:
       - name: Checkout code
