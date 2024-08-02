@@ -55,10 +55,10 @@ jobs:
     if: github.ref == 'refs/heads/main'
     needs: packer-test
     runs-on: ubuntu-latest
-    # permissions:
-    #   contents: read
-    #   issues: write
-    # environment: pre-prod
+    permissions:
+      contents: read
+      issues: write
+    environment: prod
    
     steps:
       - name: Checkout code
