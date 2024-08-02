@@ -4,14 +4,12 @@ on:
   push:
     branches:
       - 'main'
-      - 'feat/fix'
-      - 'feat/fix-main-pipeline2'
+      - 'feat/test-pipe'
 
   pull_request:
     branches:
       - 'main'
-      - 'feat/fix'
-      - 'feat/fix-main-pipeline2'
+      - 'feat/test-pipe'
 
   workflow_dispatch:
     inputs:
@@ -22,7 +20,7 @@ on:
 
 jobs:
   packer-test:
-    runs-on: xterns
+    runs-on: ubuntu-latest
 
     outputs:
       ami_id: ${{ steps.build-and-extract-ami-id.outputs.ami_id }}
@@ -56,7 +54,7 @@ jobs:
     # if: startsWith(github.ref, 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     if: github.ref == 'refs/heads/main'
     needs: packer-test
-    runs-on: xterns
+    runs-on: ubuntu-latest
     permissions:
       contents: read
       issues: write
