@@ -70,7 +70,7 @@ jobs:
       #   run: cat build.log 
         
   deploy-to-testing:
-    if: startsWith(github.ref, 'refs/heads/feature/feat/test-with-packer-ami')
+    # if: startsWith(github.ref, 'refs/heads/feature/feat/test-with-packer-ami')
     needs: packer-test
     runs-on: ubuntu-latest
     steps: 
