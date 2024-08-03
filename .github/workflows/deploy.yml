@@ -4,12 +4,12 @@ on:
   push:
     branches:
       - 'main'
-      - 'feat/fix-tri'
+      - 'feat/test-fix'
 
   pull_request:
     branches:
       - 'main'
-      - 'feat/fix-tri'
+      - 'feat/test-fix'
 
   workflow_dispatch:
     inputs:
@@ -70,7 +70,7 @@ jobs:
       #   run: cat build.log 
         
   deploy-to-testing:
-    if: startsWith(github.ref, 'refs/heads/feat/fix-tri')
+    if: startsWith(github.ref, 'refs/heads/feat/test-fix')
     needs: packer-test
     runs-on: ubuntu-latest
     steps: 
@@ -123,6 +123,9 @@ jobs:
     steps:
       - name: Manual Approval
         if: github.event.inputs.deploy_to_production == 'yes'
+        run: echo "production testing"
+        
+      - name: confirm-approval
         id: approval
         uses: trstringer/manual-approval@v1
         with:
