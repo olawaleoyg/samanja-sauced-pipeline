@@ -121,13 +121,13 @@ jobs:
     environment: production
    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
       - name: Manual Approval
+        if: github.event.inputs.deploy_to_production == 'yes'
+        run: echo "production testing"
+        
+      - name: confirm-approval
         id: approval
-        uses: hmarr/auto-approve-action@v2.0.0
-        # uses: trstringer/manual-approval@v1
+        uses: trstringer/manual-approval@v1
         with:
           approvers: olawaleoyg
           secret: ${{ secrets.GITHUB_TOKEN }}
