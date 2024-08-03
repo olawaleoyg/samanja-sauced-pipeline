@@ -4,12 +4,12 @@ on:
   push:
     branches:
       - 'main'
-      - 'feat/test-with-packer-ami'
+      - 'feat/test-manual-trigger-on-main'
 
   pull_request:
     branches:
       - 'main'
-      - 'feat/test-with-packer-ami'
+      - 'feat/test-manual-trigger-on-main'
 
   workflow_dispatch:
     inputs:
@@ -70,7 +70,7 @@ jobs:
       #   run: cat build.log 
         
   deploy-to-testing:
-    if: startsWith(github.ref, 'refs/heads/feature/feat/test-with-packer-ami')
+    if: startsWith(github.ref, 'refs/heads/feat/test-manual-trigger-on-main')
     needs: packer-test
     runs-on: ubuntu-latest
     steps: 
@@ -121,9 +121,9 @@ jobs:
     environment: production
    
     steps:
-      - name: Manual Approval
-        if: github.event.inputs.deploy_to_production == 'yes'
-        run: echo "production testing"
+      # - name: Manual Approval
+      #   if: github.event.inputs.deploy_to_production == 'yes'
+      #   run: echo "production testing"
         
       - name: confirm-approval
         id: approval
