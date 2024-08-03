@@ -9,8 +9,7 @@ on:
   pull_request:
     branches:
       - 'main'
-      - 'feat/fix'
-      - 'feat/fix-main-pipeline2'
+      - 'feat/test-with-packer-ami'
 
   workflow_dispatch:
     inputs:
@@ -47,76 +46,72 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         run: |
-          set -x
-          if [[ $GITHUB_REF == refs/heads/main ]]; then
-            OUTPUT=$(packer build -machine-readable -var "ami_tag=production" template.pkr.hcl 2>&1)
-          else
-            OUTPUT=$(packer build -machine-readable -var "ami_tag=testing" template.pkr.hcl 2>&1)
-          fi
-          echo "$OUTPUT" > build.log
+          echo "building test"
+          # if [[ $GITHUB_REF == refs/heads/main ]]; then
+          #   OUTPUT=$(packer build -machine-readable -var "ami_tag=production" template.pkr.hcl 2>&1)
+          # else
+          #   OUTPUT=$(packer build -machine-readable -var "ami_tag=testing" template.pkr.hcl 2>&1)
+          # fi
+          # echo "$OUTPUT" > build.log
 
-          # Extract AMI ID from the build output
-          AMI_ID=$(echo "$OUTPUT" | grep -oP 'ami-\w{8,17}' | tail -1)
+          # # Extract AMI ID from the build output
+          # AMI_ID=$(echo "$OUTPUT" | grep -oP 'ami-\w{8,17}' | tail -1)
 
-          if [ -z "$AMI_ID" ]; then
-            echo "AMI ID not found in build output!"
-            exit 1
-          fi
+      #     if [ -z "$AMI_ID" ]; then
+      #       echo "AMI ID not found in build output!"
+      #       exit 1
+      #     fi
 
-          echo "Extracted AMI ID: $AMI_ID"
-          echo "ami_id=$AMI_ID" >> $GITHUB_ENV
-          echo "::set-output name=ami_id::$AMI_ID"
+      #     echo "Extracted AMI ID: $AMI_ID"
+      #     echo "ami_id=$AMI_ID" >> $GITHUB_ENV
+      #     echo "::set-output name=ami_id::$AMI_ID"
 
-      - name: Check Build Log
-        run: cat build.log 
+      # - name: Check Build Log
+      #   run: cat build.log 
         
   deploy-to-testing:
-    if: startsWith(github.ref, 'refs/heads/feature/')
+    if: startsWith(github.ref, 'refs/heads/feature/feat/test-with-packer-ami')
     needs: packer-test
-    runs-on: xterns
-    environment: testing
-
+    runs-on: ubuntu-latest
     steps: 
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Testing environment
+        run: echo "Testing environment"
 
-      - name: Install or Update AWS CLI
-        run: |
-          if command -v aws &> /dev/null; then
-            echo "AWS CLI is installed. updating..."
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install --update
-          else
-            echo "AWS CLI not found. Installing..."
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install
-          fi
+      # - name: Install or Update AWS CLI
+      #   run: |
+      #     if command -v aws &> /dev/null; then
+      #       echo "AWS CLI is installed. updating..."
+      #       curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      #       unzip awscliv2.zip
+      #       sudo ./aws/install --update
+      #     else
+      #       echo "AWS CLI not found. Installing..."
+      #       curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      #       unzip awscliv2.zip
+      #       sudo ./aws/install
+      #     fi
 
-      - name: Set up AWS CLI
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
+      # - name: Set up AWS CLI
+      #   uses: aws-actions/configure-aws-credentials@v1
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: us-east-1
 
-      - name: Deploy AMI to testing environment
-        run: |
-          AMI_ID=${{ needs.packer-test.outputs.ami_id }}
-          echo "Deploying AMI to testing environment with ID $AMI_ID"
+      # - name: Deploy AMI to testing environment
+      #   run: |
+      #     AMI_ID=${{ needs.packer-test.outputs.ami_id }}
+      #     echo "Deploying AMI to testing environment with ID $AMI_ID"
         
       - name: Notify team of build success
         if: success()
         run: echo "Build and deployment to testing environment successful for branch"
 
-      - name: Notify team of build failure
-        if: failure()
-        run: echo "Build and deployment to testing environment failed for branch"
+      # - name: Notify team of build failure
+      #   if: failure()
+      #   run: echo "Build and deployment to testing environment failed for branch"
         
   deploy-to-production:
-    # if: ${{ github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/heads/feature/') }}
-    # if: startsWith(github.ref, 'refs/heads/main') || github.event_name == 'workflow_dispatch'
     if: github.ref == 'refs/heads/main'
     needs: packer-test
     runs-on: ubuntu-latest
@@ -142,32 +137,33 @@ jobs:
             URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
             Required approvers: [olawaleoyg]
             Respond "approved", "approve", "lgtm", "yes" to continue workflow or "denied", "deny", "no" to cancel.
+      
+      - name: product environment
+        run: echo "Production environment"
+      #   run: |
+      #     if command -v aws &> /dev/null; then
+      #       echo "AWS CLI is installed. updating..."
+      #       curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      #       unzip awscliv2.zip
+      #       sudo ./aws/install --update
+      #     else
+      #       echo "AWS CLI not found. Installing..."
+      #       curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+      #       unzip awscliv2.zip
+      #       sudo ./aws/install
+      #     fi
 
-      - name: Install or Update AWS CLI
-        run: |
-          if command -v aws &> /dev/null; then
-            echo "AWS CLI is installed. updating..."
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install --update
-          else
-            echo "AWS CLI not found. Installing..."
-            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-            unzip awscliv2.zip
-            sudo ./aws/install
-          fi
+      # - name: Set up AWS CLI
+      #   uses: aws-actions/configure-aws-credentials@v1
+      #   with:
+      #     aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #     aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      #     aws-region: us-east-1
 
-      - name: Set up AWS CLI
-        uses: aws-actions/configure-aws-credentials@v1
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-1
-
-      - name: Deploy AMI to production environment
-        run: |
-          AMI_ID=${{ needs.packer-test.outputs.ami_id }}
-          echo "Deploying AMI to production environment with ID $AMI_ID"
+      # - name: Deploy AMI to production environment
+      #   run: |
+      #     AMI_ID=${{ needs.packer-test.outputs.ami_id }}
+      #     echo "Deploying AMI to production environment with ID $AMI_ID"
           
       - name: Notify team of build success
         if: success()
