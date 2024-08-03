@@ -4,12 +4,12 @@ on:
   push:
     branches:
       - 'main'
-      - 'feat/test-with-packer-ami'
+      - 'feat/packer-ami-test-to-main'
 
   pull_request:
     branches:
       - 'main'
-      - 'feat/test-with-packer-ami'
+      - 'feat/packer-ami-test-to-main'
 
   workflow_dispatch:
     inputs:
@@ -126,8 +126,7 @@ jobs:
 
       - name: Manual Approval
         id: approval
-        uses: hmarr/auto-approve-action@v2.0.0
-        # uses: trstringer/manual-approval@v1
+        uses: trstringer/manual-approval@v1
         with:
           approvers: olawaleoyg
           secret: ${{ secrets.GITHUB_TOKEN }}
