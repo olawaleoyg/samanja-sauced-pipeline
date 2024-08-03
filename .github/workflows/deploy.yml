@@ -126,7 +126,8 @@ jobs:
 
       - name: Manual Approval
         id: approval
-        uses: trstringer/manual-approval@v1
+        uses: hmarr/auto-approve-action@v2.0.0
+        # uses: trstringer/manual-approval@v1
         with:
           approvers: olawaleoyg
           secret: ${{ secrets.GITHUB_TOKEN }}
